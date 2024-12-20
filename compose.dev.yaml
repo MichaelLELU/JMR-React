@@ -1,0 +1,18 @@
+services:
+  backend:
+    container_name: backend
+    build: ./back
+    command: sh -c "CHOKIDAR_USEPOLLING=true npm run dev"
+    volumes:
+      - ./back/src/:/app/src/
+    ports:
+      - 3310:3000
+
+  frontend:
+    container_name: frontend
+    build: ./front
+    command: sh -c "CHOKIDAR_USEPOLLING=true npm run dev"
+    volumes:
+      - ./front/src/:/app/src/
+    ports:
+      - 3615:5173

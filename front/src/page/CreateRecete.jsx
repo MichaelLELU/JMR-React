@@ -29,7 +29,7 @@ const options = [
             <label name="instructions">Description</label>
             <textarea type="textArea" id="instructions" name="instructions" required></textarea>
             <label name="ingredients">Ingrédients</label>
-            <CreatableSelect isMulti options={colourOptions} />
+            <CreatableSelect isMulti options={} />
             <label name="globalTime">Temps Globale</label>
             <input type="text" id="globalTime" name="globalTime" required></input>
             <button type="submit">Créer</button>
