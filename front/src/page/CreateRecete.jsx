@@ -2,6 +2,23 @@ import { useEffect, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
+const UPLOAD_FILE = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("http://localhost:4000/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de l'upload de l'image");
+  }
+
+  const data = await response.json();
+  return data.filePath;
+};
+
 const GET_INGREDIENTS = gql`
   query GetIngredients {
     getIngredients {
@@ -10,17 +27,17 @@ const GET_INGREDIENTS = gql`
   }
 `;
 
-const CREATE_RECETE = gql`
-  mutation Mutation($data: RecetesInput!) {
-    createRecete(data: $data) {
+const CREATE_INGREDIENT = gql`
+  mutation Mutation($data: ingredientInput!) {
+    createIngredients(data: $data) {
       name
     }
   }
 `;
 
-const CREATE_INGREDIENT = gql`
-  mutation Mutation($data: ingredientInput!) {
-    createIngredients(data: $data) {
+const CREATE_RECETE = gql`
+  mutation Mutation($data: RecetesInput!) {
+    createRecete(data: $data) {
       name
     }
   }
@@ -35,8 +52,9 @@ export default function CreateRecete() {
 
   const [createIngredients] = useMutation(CREATE_INGREDIENT);
 
-  // État local pour les ingrédients sélectionnés
+  // État local pour les ingrédients sélectionnés et le fichier d'image
   const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const hSubmit = async (evt) => {
     evt.preventDefault();
@@ -67,28 +85,30 @@ export default function CreateRecete() {
       // Attendre que tous les ingrédients soient créés ou récupérés
       const resolvedIngredients = await Promise.all(ingredientPromises);
 
-      // Étape 2 : Préparer les données pour la mutation createRecete
+      // Étape 2 : Upload de l'image
+      let picturePath = "";
+      if (selectedFile) {
+        picturePath = await UPLOAD_FILE(selectedFile);
+      }
+
+      // Étape 3 : Préparer les données pour la mutation createRecete
       const dataToSend = {
         name: formJson.name,
         instructions: formJson.instructions,
         globalTime: formJson.globalTime,
         ingredients: resolvedIngredients, // Utilise les noms des ingrédients
-        picture: formJson.picture || "", // Optionnel, ajout de l'image si présente
+        picture: picturePath,
       };
 
       console.log("Données envoyées à createRecete :", dataToSend);
 
       const { data: newRecete } = await createRecete({
-        variables: { data: dataToSend }, // Correction ici
+        variables: { data: dataToSend },
       });
 
       console.log("Recette créée avec succès :", newRecete);
     } catch (error) {
-      console.error(
-        "Erreur lors de la création de la recette ou des ingrédients :",
-        newRecete,
-        error
-      );
+      console.error("Erreur complète :", JSON.stringify(error, null, 2));
     }
   };
 
@@ -120,7 +140,13 @@ export default function CreateRecete() {
         <input type="text" id="globalTime" name="globalTime" required />
 
         <label htmlFor="picture">Image</label>
-        <input type="text" id="picture" name="picture" />
+        <input
+          type="file"
+          id="picture"
+          name="picture"
+          accept="image/*"
+          onChange={(e) => setSelectedFile(e.target.files[0])}
+        />
 
         <button type="submit" disabled={subLoading}>
           Créer

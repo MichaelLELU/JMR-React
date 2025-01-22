@@ -4,17 +4,21 @@ import { Recetes } from "../entities/Recetes";
 import { Ingredients } from "../entities/Ingredients";
 
 @InputType()
-class RecetesInput {
+export class RecetesInput {
   @Field()
   name!: string;
+
   @Field()
   globalTime!: string;
+
   @Field()
   picture!: string;
+
   @Field()
   instructions!: string;
+
   @Field(() => [String])
-  ingredients!: Ingredients[];
+  ingredients!: string[];
 }
 
 @Resolver(Recetes)
@@ -27,13 +31,17 @@ export class RecetesResolver {
 
   @Mutation(() => Recetes)
   async createRecete(@Arg("data") data: RecetesInput) {
-    console.log(data);
-    let recete = new Recetes();
-    recete = Object.assign(recete, data);
-    const ingredients = await Ingredients.findBy({
+    const recete = new Recetes();
+    recete.name = data.name;
+    recete.globalTime = data.globalTime;
+    recete.instructions = data.instructions;
+    recete.picture = data.picture;
+
+    const ingredientEntities = await Ingredients.findBy({
       name: In(data.ingredients),
     });
-    recete.ingredients = ingredients;
+    recete.ingredients = ingredientEntities;
+    console.log(recete);
     await recete.save();
     return recete;
   }

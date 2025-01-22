@@ -6,10 +6,8 @@ import {
   ManyToMany,
   PrimaryGeneratedColumn,
   JoinTable,
-  OneToMany,
 } from "typeorm";
 import { Ingredients } from "./Ingredients";
-import { Users } from "./Users";
 
 @Entity()
 @ObjectType()
@@ -33,10 +31,6 @@ export class Recetes extends BaseEntity {
   @Field()
   @Column()
   instructions!: string;
-
-  @Field(() => [Users])
-  @OneToMany(() => Users, (users) => users.recetes)
-  users!: Users[];
 
   @Field(() => [Ingredients])
   @ManyToMany(() => Ingredients, (ingredients) => ingredients.recetes)
