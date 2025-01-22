@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
@@ -44,6 +45,7 @@ const CREATE_RECETE = gql`
 `;
 
 export default function CreateRecete() {
+  const navigate = useNavigate();
   const { loading, error, data } = useQuery(GET_INGREDIENTS);
   const [
     createRecete,
@@ -107,6 +109,8 @@ export default function CreateRecete() {
       });
 
       console.log("Recette créée avec succès :", newRecete);
+
+      navigate("/");
     } catch (error) {
       console.error("Erreur complète :", JSON.stringify(error, null, 2));
     }
