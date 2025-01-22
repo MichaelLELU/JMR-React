@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: backend
+    build: ./back
+    command: sh -c "CHOKIDAR_USEPOLLING=true npm run dev"
+    volumes:
+      - ./back/src/:/app/src/
+    ports:
+      - 3310:3000
+
+  frontend:
+    container_name: frontend
+    build: ./front
+    command: sh -c "CHOKIDAR_USEPOLLING=true npm run dev"
+    volumes:
+      - ./front/src/:/app/src/
+    ports:
+      - 3615:5173
+
+  upload:
+    container_name: upload
+    build: ./files
+    ports:
+      - 4000:4000
+    volumes:
+      - ./files/uploads:/app/uploads
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+      - upload
