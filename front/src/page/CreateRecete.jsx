@@ -84,21 +84,18 @@ export default function CreateRecete() {
         return ingredient.label; // Retourne le nom de l'ingrédient existant
       });
 
-      // Attendre que tous les ingrédients soient créés ou récupérés
       const resolvedIngredients = await Promise.all(ingredientPromises);
 
-      // Étape 2 : Upload de l'image
       let picturePath = "";
       if (selectedFile) {
         picturePath = await UPLOAD_FILE(selectedFile);
       }
 
-      // Étape 3 : Préparer les données pour la mutation createRecete
       const dataToSend = {
         name: formJson.name,
         instructions: formJson.instructions,
         globalTime: formJson.globalTime,
-        ingredients: resolvedIngredients, // Utilise les noms des ingrédients
+        ingredients: resolvedIngredients,
         picture: picturePath,
       };
 
